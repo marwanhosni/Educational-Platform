@@ -1,14 +1,17 @@
-
+﻿
 using Educational_Platform.Core.Entities;
 using Educational_Platform.Core.Entities.Jwt;
 using Educational_Platform.Core.Interface;
+using Educational_Platform.Helpers;
 using Educational_Platform.Repository;
 using Educational_Platform.Repository.Data;
+using Educational_Platform.Repository.Immplementations;
 using Educational_Platform.Repository.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models; 
 using System.Text;
 
 namespace Educational_Platform
@@ -23,11 +26,19 @@ namespace Educational_Platform
             builder.Services.AddDataProtection();
             builder.Services.AddHttpContextAccessor();
 
+            //Mapping
+            builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
             //Jwt token
             var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IAuditService, AuditService>();
+            builder.Services.AddScoped<IGroupService, GroupService>();
+            builder.Services.AddScoped<IRegistrationService, RegistrationService>();
+            builder.Services.AddScoped<ISecretaryService, SecretaryService>();
 
             builder.Services.AddAuthentication(options =>
             {
@@ -65,6 +76,41 @@ namespace Educational_Platform
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddControllers();
+            // إعداد Swagger مع دعم الـ JWT (زرار Authorize)
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "منصة مستر حسني إبراهيم - API",
+                    Version = "v1",
+                    Description = "توثيق واجهات برمجة التطبيقات لمنصة مادة الدراسات الاجتماعية"
+                });
+                // إضافة قفل الأمان للـ JWT في Swagger
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "اكتب كلمة 'Bearer' متبوعة بمسافة ثم التوكن، مثال:\nBearer eyJhbGciOi..."
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -73,7 +119,11 @@ namespace Educational_Platform
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "منصة مستر حسني إبراهيم v1");
+                });
             }
 
             app.UseHttpsRedirection();
