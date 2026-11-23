@@ -39,7 +39,9 @@ namespace Educational_Platform
             builder.Services.AddScoped<IGroupService, GroupService>();
             builder.Services.AddScoped<IRegistrationService, RegistrationService>();
             builder.Services.AddScoped<ISecretaryService, SecretaryService>();
-
+            builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
+            builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -86,7 +88,6 @@ namespace Educational_Platform
                     Version = "v1",
                     Description = "توثيق واجهات برمجة التطبيقات لمنصة مادة الدراسات الاجتماعية"
                 });
-                // إضافة قفل الأمان للـ JWT في Swagger
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -127,7 +128,7 @@ namespace Educational_Platform
             }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseAuthentication(); 
 
             app.UseAuthorization();
