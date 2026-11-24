@@ -43,6 +43,10 @@ namespace Educational_Platform
             builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
             builder.Services.AddScoped<IFileService, FileService>();
             builder.Services.AddScoped<ICenterPaymentService, CenterPaymentService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IExamService, ExamService>();
+            builder.Services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
+            builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 
             builder.Services.AddAuthentication(options =>
             {
