@@ -42,6 +42,8 @@ namespace Educational_Platform
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<ISiteSettingService, SiteSettingService>();
             builder.Services.AddScoped<IFileService, FileService>();
+            builder.Services.AddScoped<ICenterPaymentService, CenterPaymentService>();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -78,7 +80,7 @@ namespace Educational_Platform
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
             builder.Services.AddControllers();
-            // إعداد Swagger مع دعم الـ JWT (زرار Authorize)
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
